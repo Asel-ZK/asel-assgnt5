@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yaml
+    kompose.version: 1.20.0 (f3d54d784)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: data
+  name: data
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: data
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yaml
+        kompose.version: 1.20.0 (f3d54d784)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/myapp: "true"
+        io.kompose.service: data
+    spec:
+      containers:
+      - image: aselzk/quotes-data:v1
+        name: db
+        envFrom:
+          - secretRef:
+              name: data-secret
+        ports:
+        - containerPort: 3306        
+        resources: {}
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          subPath: mysql
+          name: asel-claim
+      volumes:
+        - name: asel-claim
+          persistentVolumeClaim:
+            claimName: asel-claim     
+      restartPolicy: Always
+status: {}
